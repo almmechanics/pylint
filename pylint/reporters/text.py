@@ -9,6 +9,7 @@
 # Copyright (c) 2018 Sushobhit <31987769+sushobhit27@users.noreply.github.com>
 # Copyright (c) 2018 Jace Browning <jacebrowning@gmail.com>
 # Copyright (c) 2018 Nick Drozd <nicholasdrozd@gmail.com>
+# Copyright (c) 2018 Martin Palmer <martin.palmer@almmechanics.com>
 
 # Licensed under the GPL: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 # For details: https://github.com/PyCQA/pylint/blob/master/COPYING
@@ -28,6 +29,8 @@ from pylint.interfaces import IReporter
 from pylint.reporters import BaseReporter
 from pylint import utils
 from pylint.reporters.ureports.text_writer import TextWriter
+from pylint.reporters.ureports.markdown_writer import MarkdownWriter
+
 
 
 TITLE_UNDERLINES = ["", "=", "-", "."]
@@ -182,6 +185,34 @@ class VSTextReporter(ParseableTextReporter):
     name = "msvs"
     line_format = "{path}({line}): [{msg_id}({symbol}){obj}] {msg}"
 
+class MarkdownReporter(TextReporter):
+    """Markdown reporter"""
+
+    name = "markdown"
+    extension = "md"
+  
+    def __init__(self, output=None):
+        TextReporter.__init__(self, output)
+        self.writeln("# Pylint Markdown Summary")
+
+    def write_message(self, msg):
+        """Convenience method to write a formated message with class default template"""
+        self.writeln(msg.format("* Line {line} {path}: [{msg_id}({symbol}){obj}] {msg}"))
+
+    def handle_message(self, msg):
+        """manage message of different type and in the context of path"""
+        if msg.module not in self._modules:
+            if msg.module:
+                self.writeln("## Module %s" % msg.module)
+                self._modules.add(msg.module)
+       
+        self.write_message(msg)
+
+    def _display(self, layout):
+        """launch layouts display"""
+        print(file=self.out)
+        MarkdownWriter().format(layout, self.out)
+
 
 class ColorizedTextReporter(TextReporter):
     """Simple TextReporter that colorizes text output"""
@@ -248,3 +279,4 @@ def register(linter):
     linter.register_reporter(ParseableTextReporter)
     linter.register_reporter(VSTextReporter)
     linter.register_reporter(ColorizedTextReporter)
+    linter.register_reporter(MarkdownReporter)

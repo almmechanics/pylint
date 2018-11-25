@@ -47,6 +47,10 @@ A few other examples:
 
     {path}({line}): [{msg_id}{obj}] {msg}
 
+* Markdown compatible format (former 'markdown' output format)::
+
+    * {path}({line}): [{msg_id}{obj}] {msg}
+
 * Parseable (Emacs and all, former 'parseable' output format) format::
 
     {path}:{line}: [{msg_id}({symbol}), {obj}] {msg}
